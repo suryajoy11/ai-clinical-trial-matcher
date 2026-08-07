@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pydantic
+requests
+httpx
+pandas
+numpy
+scikit-learn
+sqlalchemy
+psycopg2-binary
+python-dotenv
+pytest
+mlflow
