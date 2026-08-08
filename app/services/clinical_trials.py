@@ -1,6 +1,7 @@
 import requests
 
-BASE_URL = ("https://clinicaltrials.gov/api/v2/studies")
+BASE_URL = "https://clinicaltrials.gov/api/v2/studies"
+
 
 def search_trials(condition: str, page_size: int = 10):
     params = {
@@ -12,7 +13,7 @@ def search_trials(condition: str, page_size: int = 10):
     response = requests.get(
         BASE_URL,
         params=params,
-        timeout=30python scripts/fetch_trials.py
+        timeout=30
     )
 
     response.raise_for_status()

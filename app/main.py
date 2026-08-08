@@ -1,10 +1,18 @@
 from fastapi import FastAPI
 
+from app.api.patients import router as patient_router
+from app.api.matching import router as matching_router
+
+
 app = FastAPI(
     title="AI Clinical Trial Matching System",
-    description="AI-powered system for matching patients with clinical trials",
-    version="1.0.0",
+    description="AI-powered patient-to-clinical-trial matching system",
+    version="1.0.0"
 )
+
+
+app.include_router(patient_router)
+app.include_router(matching_router)
 
 
 @app.get("/")
