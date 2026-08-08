@@ -37,7 +37,8 @@ def match_patient_to_trials(patient: Patient):
                 "title": trial["title"],
                 "status": trial["overall_status"],
                 "score": match["score"],
-                "reasons": match["reasons"]
+                "reasons": match["reasons"],
+                "warnings": match["warnings"]
             })
 
         # Highest score first
