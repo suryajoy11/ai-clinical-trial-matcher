@@ -26,35 +26,32 @@ def calculate_match_score(patient, trial):
         warnings.append("Exact condition match was not found")
 
     # -------------------------
+    
     # 2. Age eligibility
-    # -------------------------
-    minimum_age = extract_age(
-        trial.get("minimum_age")
-    )
+    minimum_age = extract_age(trial.get("minimum_age"))
+    maximum_age = extract_age(trial.get("maximum_age"))
 
-    maximum_age = extract_age(
-        trial.get("maximum_age")
-    )
-
+    patient_age_months = patient.age * 12
     age_eligible = True
 
-    if minimum_age is not None and patient.age < minimum_age:
+    if minimum_age is not None and patient_age_months < minimum_age:
         age_eligible = False
-        warnings.append(
-            f"Patient is below minimum age of {minimum_age}"
-        )
+        warnings.append("Patient is below minimum age")
 
-    if maximum_age is not None and patient.age > maximum_age:
+    if maximum_age is not None and patient_age_months > maximum_age:
         age_eligible = False
-        warnings.append(
-            f"Patient exceeds maximum age of {maximum_age}"
-        )
+        warnings.append("Patient exceeds maximum age")
 
     if age_eligible:
-        score += 25
-        reasons.append("Patient meets trial age requirements")
+        if minimum_age is None or maximum_age is None:
+            warnings.append(
+                "Some age eligibility information is unavailable"
+            )
+        else:
+            score += 25
+            reasons.append("Patient meets trial age requirements")
 
-    # -------------------------
+# -------------------------
     # 3. Sex eligibility
     # -------------------------
     trial_sex = (trial.get("sex") or "").upper()
