@@ -77,3 +77,56 @@ def test_patient_below_minimum_age():
         for warning in result["warnings"]
         
     )
+
+def test_completed_trial_warning():
+    patient = Patient(
+        patient_id="TEST003",
+        age=40,
+        gender="Male",
+        condition="Type 2 Diabetes"
+    )
+
+    trial = {
+        "nct_id": "NCT00000003",
+        "title": "Type 2 Diabetes Study",
+        "minimum_age": "18 Years",
+        "maximum_age": "65 Years",
+        "sex": "ALL",
+        "eligibility_criteria": "Adults with Type 2 Diabetes.",
+        "overall_status": "COMPLETED",
+        "locations": []
+    }
+
+    result = calculate_match_score(patient, trial)
+
+    assert any(
+        "not currently recruiting" in warning.lower()
+        for warning in result["warnings"]
+    )
+
+
+def test_patient_at_minimum_age():
+    patient = Patient(
+        patient_id="TEST004",
+        age=18,
+        gender="Female",
+        condition="Type 2 Diabetes"
+    )
+
+    trial = {
+        "nct_id": "NCT00000004",
+        "title": "Type 2 Diabetes Study",
+        "minimum_age": "18 Years",
+        "maximum_age": "65 Years",
+        "sex": "ALL",
+        "eligibility_criteria": "Adults with Type 2 Diabetes.",
+        "overall_status": "RECRUITING",
+        "locations": []
+    }
+
+    result = calculate_match_score(patient, trial)
+
+    assert any(
+        "meets trial age requirements" in reason.lower()
+        for reason in result["reasons"]
+    )
