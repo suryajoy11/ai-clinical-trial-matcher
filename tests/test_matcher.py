@@ -130,3 +130,35 @@ def test_patient_at_minimum_age():
         "meets trial age requirements" in reason.lower()
         for reason in result["reasons"]
     )
+
+def test_missing_age_information():
+    patient = Patient(
+        patient_id="TEST006",
+        age=35,
+        gender="Male",
+        condition="Type 2 Diabetes"
+    )
+
+    trial = {
+        "nct_id": "NCT00000006",
+        "title": "Type 2 Diabetes Study",
+        "minimum_age": None,
+        "maximum_age": None,
+        "sex": "ALL",
+        "eligibility_criteria": "Adults with Type 2 Diabetes.",
+        "overall_status": "RECRUITING",
+        "locations": []
+    }
+
+    result = calculate_match_score(patient, trial)
+
+    assert any(
+        "age eligibility information is unavailable"
+        in warning.lower()
+        for warning in result["warnings"]
+    )
+
+    assert not any(
+        "meets trial age requirements" in reason.lower()
+        for reason in result["reasons"]
+    )
