@@ -1,6 +1,8 @@
+
 from fastapi import APIRouter, HTTPException
 
 from app.models.patient import Patient
+from app.models.match import MatchResponse
 from app.services.clinical_trials import search_trials
 from app.services.trial_parser import parse_trial
 from app.services.matcher import calculate_match_score
@@ -12,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.post("/")
+@router.post("/", response_model=MatchResponse)
 def match_patient_to_trials(patient: Patient):
     try:
         # Search ClinicalTrials.gov
@@ -36,11 +38,12 @@ def match_patient_to_trials(patient: Patient):
                 "nct_id": trial["nct_id"],
                 "title": trial["title"],
                 "status": trial["overall_status"],
-                "score": match["score"],
+                "rule_score": float(match["rule_score"]),
+                "nlp_score": float(match["nlp_score"]),
+                "score": float(match["score"]),
                 "reasons": match["reasons"],
                 "warnings": match["warnings"]
             })
-
         # Highest score first
         results.sort(
             key=lambda item: item["score"],
@@ -55,7 +58,9 @@ def match_patient_to_trials(patient: Patient):
         }
 
     except Exception as exc:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Trial matching failed: {str(exc)}"
-        )
+        import traceback
+    traceback.print_exc()
+    raise HTTPException(
+        status_code=500,
+        detail=f"Trial matching failed: {str(exc)}"
+    )
