@@ -14,10 +14,17 @@ router = APIRouter(
 )
 
 
+ALLOWED_STATUSES = {
+    "RECRUITING",
+    "NOT_YET_RECRUITING",
+    "ENROLLING_BY_INVITATION"
+}
+
+
 @router.post("/", response_model=MatchResponse)
 def match_patient_to_trials(patient: Patient):
     try:
-        # Search ClinicalTrials.gov
+        # Retrieve studies from ClinicalTrials.gov
         data = search_trials(
             patient.condition,
             page_size=10
@@ -25,9 +32,13 @@ def match_patient_to_trials(patient: Patient):
 
         results = []
 
-        # Parse and score every trial
+        # Parse, filter and score each study
         for study in data.get("studies", []):
             trial = parse_trial(study)
+
+            # Exclude trials outside the selected statuses
+            if trial.get("overall_status") not in ALLOWED_STATUSES:
+                continue
 
             match = calculate_match_score(
                 patient,
@@ -44,7 +55,8 @@ def match_patient_to_trials(patient: Patient):
                 "reasons": match["reasons"],
                 "warnings": match["warnings"]
             })
-        # Highest score first
+
+        # Rank highest scores first
         results.sort(
             key=lambda item: item["score"],
             reverse=True
@@ -58,9 +70,7 @@ def match_patient_to_trials(patient: Patient):
         }
 
     except Exception as exc:
-        import traceback
-    traceback.print_exc()
-    raise HTTPException(
-        status_code=500,
-        detail=f"Trial matching failed: {str(exc)}"
-    )
+        raise HTTPException(
+            status_code=500,
+            detail="Clinical trial matching failed"
+        ) from exc
